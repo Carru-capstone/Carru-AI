@@ -38,7 +38,7 @@ def predict_from_json():
         }
 
         return app.response_class(
-            response=json.dumps(response_json, ensure_ascii=False),  # JSON 순서 유지
+            response=json.dumps(response_json, ensure_ascii=False, default=str),  # JSON 순서 유지
             status=200,
             mimetype='application/json'
         )
