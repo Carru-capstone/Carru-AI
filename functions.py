@@ -283,41 +283,52 @@ def results_with_product_info(input_df, results_df):
             (input_df['departure_long'] == row['user_departure_long']) &
             (input_df['destination_lat'] == row['user_destination_lat']) &
             (input_df['destination_long'] == row['user_destination_long'])
-            ]
+        ]
 
         main_match = product_df[
             (product_df['departure_lat'] == row['main_departure_lat']) &
             (product_df['departure_long'] == row['main_departure_long']) &
             (product_df['destination_lat'] == row['main_destination_lat']) &
             (product_df['destination_long'] == row['main_destination_long'])
-            ]
+        ]
 
         stopover_match = product_df[
             (product_df['departure_lat'] == row['stopover_departure_lat']) &
             (product_df['departure_long'] == row['stopover_departure_lon']) &
             (product_df['destination_lat'] == row['stopover_destination_lat']) &
             (product_df['destination_long'] == row['stopover_destination_lon'])
-            ]
+        ]
 
         second_stopover_match = product_df[
             (product_df['departure_lat'] == row['second_stopover_departure_lat']) &
             (product_df['departure_long'] == row['second_stopover_departure_lon']) &
             (product_df['destination_lat'] == row['second_stopover_destination_lat']) &
             (product_df['destination_long'] == row['second_stopover_destination_lon'])
-            ]
+        ]
 
-        user_info = user_match.iloc[
-            0].to_dict() if not user_match.empty else {}
+        # 상품 정보 가져오기
+        user_info = user_match.iloc[0].to_dict() if not user_match.empty else {}
+        main_info = main_match.iloc[0].to_dict() if not main_match.empty else {}
+        stopover_info = stopover_match.iloc[0].to_dict() if not stopover_match.empty else {}
+        second_stopover_info = second_stopover_match.iloc[0].to_dict() if not second_stopover_match.empty else {}
 
-        main_info = main_match.iloc[
-            0].to_dict() if not main_match.empty else {}
+        # 중복된 product_id 제거
+        product_ids_seen = set()
 
-        stopover_info = stopover_match.iloc[
-            0].to_dict() if not stopover_match.empty else {}
+        def is_unique(info):
+            """중복 확인 및 제거"""
+            product_id = info.get('product_id')
+            if product_id and product_id not in product_ids_seen:
+                product_ids_seen.add(product_id)
+                return True
+            return False
 
-        second_stopover_info = second_stopover_match.iloc[
-            0].to_dict() if not second_stopover_match.empty else {}
+        # 각 상품 정보에서 중복 확인
+        main_info = main_info if is_unique(main_info) else {}
+        stopover_info = stopover_info if is_unique(stopover_info) else {}
+        second_stopover_info = second_stopover_info if is_unique(second_stopover_info) else {}
 
+        # 결과 저장
         product_info_list.append({
             'user_product_info': user_info,
             'main_product_info': main_info,
